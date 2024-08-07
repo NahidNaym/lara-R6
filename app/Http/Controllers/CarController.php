@@ -25,9 +25,12 @@ class CarController extends Controller
      */
     public function create()
     {
-        return view('add_car');
+        return view('add-car');
     }
 
+
+
+    
     /**
      * Store a newly created resource in storage.
      */
@@ -49,8 +52,22 @@ class CarController extends Controller
      */
     public function show(string $id)
     {
+       
+        $car = Car::findOrFail($id);
+        dd($car);
+        return view('car_show', compact('car'));
         //
     }
+
+    public function upload(Request $request)
+    
+    {
+        $file_extension = $request->image->getClientOriginalExtension();
+        $file_name = time() . '.' . $file_extension;
+        $path = 'images';
+        $request->image->move($path, $file_name);
+        return 'Uploaded';
+        }
 
     /**
      * Show the form for editing the specified resource.
@@ -60,15 +77,35 @@ class CarController extends Controller
         // get data of car to be updated
         // select 
         $car = Car::findOrFail($id);
-        return view('edit_car', compact('car'));
+        
+        return view('edit-car', compact('car'));
     }
 
     /**
      * Update the specified resource in storage.
      */
+
+
+     public function restore(string $id) {
+        Car::where('id', $id)->restore();
+        return redirect()->route('cars.showDeleted');
+    }
+
     public function update(Request $request, string $id)
     {
-        //
+        // $request ==> data to be updated
+        // $id 
+
+        $data = [
+            'carTitle' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
+            'published' => isset($request->published),
+        ];
+
+        Car::where('id', $id)->update($data);
+
+        return "data updated successfully";
     }
 
     /**
@@ -76,6 +113,6 @@ class CarController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        return 'delete page';
     }
 }

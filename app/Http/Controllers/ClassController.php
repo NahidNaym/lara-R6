@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cclass;
 use Illuminate\Http\Request;
-use App\Models\ClassData;
 
 class ClassController extends Controller
 {
@@ -12,7 +12,9 @@ class ClassController extends Controller
      */
     public function index()
     {
-        $classes = ClassData::get();
+        $classes = Cclass::get();
+
+        return view('classes', compact('classes')); //
     }
 
     /**
@@ -20,7 +22,7 @@ class ClassController extends Controller
      */
     public function create()
     {
-        
+        return view('add-class');  //
     }
 
     /**
@@ -28,7 +30,22 @@ class ClassController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Cclass::create([
+            // 'k' => 'v'
+
+
+
+       
+            'className' => $request->className,
+            'capacity' => $request->capacity,
+            'price' => $request->price,
+            'isFulled' => isset($request->isFulled),
+            'timeFrom' => $request->timeFrom,
+            'timeTo' => $request->timeTo,
+            'updated_at' => $request->updated_at,
+        ]);
+
+        return "Data added successfully"; //
     }
 
     /**
@@ -36,6 +53,8 @@ class ClassController extends Controller
      */
     public function show(string $id)
     {
+        $class = Cclass::findOrFail($id);
+return view('show', compact('class'));
         //
     }
 
@@ -44,7 +63,10 @@ class ClassController extends Controller
      */
     public function edit(string $id)
     {
-        //
+
+        $class = Cclass::findOrFail($id);
+        return view('edit-class', compact('class'));
+        
     }
 
     /**
@@ -52,14 +74,44 @@ class ClassController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        
+
+        $data = [
+            
+            'className' => $request->className,
+            'capacity' => $request->capacity,
+            'price' => $request->price,
+            'isFulled' => isset($request->isFulled),
+            'timeFrom' => $request->timeFrom,
+            'timeTo' => $request->timeTo,
+            'updated_at' => $request->updated_at
+        ] ;
+
+        Cclass::where('id', $id)->update($data);
+
+        return "data updated successfully";
+    }
+
+    public function showDeleted() {
+        $classes =  Cclass::onlyTrashed()->get();
+
+        return view('trashedClasses', compact('classes'));
+    }
+
+    public function restore(string $id) {
+        Cclass::where('id', $id)->restore();
+        return redirect()->route('classes.showDeleted');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request )
     {
+
+        $id = $request->id;
+Cclass::where('id', $id)->delete();
+return "deleted";
         //
     }
 }
